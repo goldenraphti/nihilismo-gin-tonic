@@ -1,11 +1,180 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
+import astroLogo from '../assets/astro.svg';
+import background from '../assets/background.svg';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
 ---
 
 <Layout>
-	<Welcome />
+
+<div id="container">
+	<img id="background" src={background.src} alt="" fetchpriority="high" />
+	<main>
+		<h1>Nihilismo & Objectif 52 Labs</h1>
+		<form>
+			<div>
+				<label for="nihilist-search">Tapez votre question à la sagesse infinie:</label>
+				<textarea id="nihilist-search" placeholder="Example: Y a-t-il une vie après la vie ? Les dieux peuvent-ils être transexuels ? ..." />
+				<button type="submit" class="button-slick">
+					<span>Demander</span>
+					<svg fill="currentColor" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+						viewBox="0 0 24 24" xml:space="preserve">
+						<polygon points="12,7 13,7 13,9 15,9 15,11 3,11 3,13 15,13 15,15 13,15 13,17 12,17 12,19 15,19 15,17 17,17 17,15 19,15 19,14
+						20,14 20,13 21,13 21,11 20,11 20,10 19,10 19,9 17,9 17,7 15,7 15,5 12,5 "/>
+				 </svg>
+			</button>
+			</div>
+		</form>
+		<footer><a href="https://raphaelferrand.com">R. Ferrand</a></footer>
+	</main>
+</div>
+
+<style>
+	#background {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		z-index: -1;
+		filter: blur(100px);
+	}
+
+	#container {
+		font-family: Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif;
+		height: 100%;
+
+		& main {
+			height: 100%;
+			width: 100%;
+			display: grid;
+			place-items: center;
+			grid-template-areas:
+				'title'
+				'search'
+				'footer';
+
+			h1 {
+				grid-area: title;
+				align-self: start;
+			}
+
+			form {
+				grid-area: search;
+				width: 100%;
+				height: 100%;
+				display: grid;
+				place-items: center;
+				grid-template-columns: auto 80% auto;
+				grid-template-rows: auto 70% auto;
+
+				div {
+					grid-row: 2;
+					grid-column: 2;
+					width: 100%;
+					height: 100%;
+					gap: 1rem;
+					display: flex;
+					flex-direction: column;
+					align-items: flex-start;
+				}
+
+				input, textarea{
+					width: 100%;
+					height: 100%;
+					border-radius: 0.5rem;
+					padding: 1rem;
+					border:none;
+
+					&::placeholder {
+						font-size: 0.7em;
+					}
+				}
+
+				button {
+					display: flex;
+					align-items: center;
+					gap: 0.5rem;
+					padding-inline-end: 3rem;
+					align-self: flex-end;
+
+					svg {
+						min-width: 1rem;
+						min-height: 1rem;
+						opacity: 0.8;
+					}
+				}
+			}
+
+			footer {
+				grid-area: footer;
+				align-self: end;
+				text-align: center;
+				font-size: 0.8rem;
+				margin-top: 2rem;
+			}
+		}
+	}
+
+	</style>
+
+<script type="module">
+
+	import {franc} from 'https://esm.sh/franc@6?bundle'
+
+	const frenchAnswers = [
+		"Mais quelle question stupide ! Tout cela n'est que concepts abstraits inventés par cette animal que vous appelez l'homme. Prenez plutôt un gin & tonic !",
+	];
+	const englishAnswers = [
+		"Such a stupid question! All of this is just abstract concepts invented by this animal you call a human. Take a gin & tonic instead!",]
+	const supportedVoices = window.speechSynthesis.getVoices().map((voice) => {
+		return voice.lang
+	})
+	let answers = [];
+
+
+	document.addEventListener('DOMContentLoaded', () => {
+		const form = document.querySelector('form');
+		const input = document.getElementById('nihilist-search');
+
+
+		form.addEventListener('submit', (e) => {
+			e.preventDefault();
+			const searchTextValue = input?.value;
+			if(!searchTextValue) return;
+
+			const langUsedInQuestion = franc(searchTextValue);
+
+			if(langUsedInQuestion === 'fra') {
+				if(!supportedVoices.includes('fr-FR')) {
+					answers = ["I cannot speak French, I'm sorry. But take a gin & tonix & chillax. Cheerio."];
+				} else {
+					answers = frenchAnswers;
+				}
+			} else if(langUsedInQuestion === 'eng') {
+				if (!supportedVoices.includes('en-US' || 'en-GB')) {
+					answers = ["Désolé, je ne parle pas anglais. Mais je vous suggère de prendre un bon ptit gin & tonic."];
+				} else {
+					answers = englishAnswers;
+				}
+			}
+
+			const randomAnswer = answers[Math.floor(Math.random() * answers.length)];
+
+			const utterThis = new SpeechSynthesisUtterance(randomAnswer);
+			speechSynthesis.speak(utterThis);
+
+			utterThis.onpause = (event) => {
+				const char = event.utterance.text.charAt(event.charIndex);
+				console.log(
+					`Speech paused at character ${event.charIndex} of "${event.utterance.text}", which is "${char}".`,
+				);
+			};
+
+			input.blur();
+
+		});
+	});
+</script>
+
 </Layout>
