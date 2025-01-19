@@ -122,11 +122,14 @@ import background from '../assets/background.svg';
 
 	import {franc} from 'https://esm.sh/franc@6?bundle'
 
-	const frenchAnswers = [
-		"Mais quelle question stupide ! Tout cela n'est que concepts abstraits inventés par cette animal que vous appelez l'homme. Prenez plutôt un gin & tonic !",
+	const frenchConceptsWords = new Set(["vie", "mort", "dieu", "déité",  "existence", "absence", "néant", "infini", "éternité", "temps", "espace", "univers", "réalité", "illusion", "vérité", "mensonge", "connaissance", "ignorance", "sagesse", "folie", "amour", "haine", "bien", "mal", "justice", "injustice", "liberté", "bonheur", "souffrance", "paix", "guerre", "ordre", "chaos", "harmonie", "désordre", "beauté", "laideur", "art", "science", "philosophie", "religion", "politique", "économie", "société", "individu", "collectif", "famille", "amitié", "ennemi", "normal", "anormal", "nature", "culture", "technologie", "médecine", "éducation", "travail", "loisir", "sport", "jeu", "musique", "littérature", "cinéma", "théâtre", "danse", "peinture", "sculpture", "architecture", "photographie", "poésie", "prose", "roman", "essai", "thèse", "antithèse", "synthèse", "théorie", "pratique", "abstrait", "concret", "virtuel", "réel", "imaginaire", "réel", "possible", "impossible", "probable", "improbable", "nécessaire", "contingent", "absolu", "relatif", "universel", "particulier", "général", "singulier", "multiple", "unique", "commun", "public", "privé", "intime", "personnel", "collectif", "individuel", "social", "sociétal", "politique", "économique", "culturel", "religieux", "scientifique", "artistique", "technologique", "médical", "pédagogique", "ludique", "sportif"]);
+	const englishConceptsWords = new Set(["life", "death", "god", "deity", "existence", "absence", "nothingness", "infinity", "eternity", "time", "space", "universe", "reality", "illusion", "truth", "lie", "knowledge", "ignorance", "wisdom", "folly", "love", "hate", "good", "evil", "justice", "injustice", "freedom", "happiness", "suffering", "peace", "war", "order", "chaos", "harmony", "disorder", "beauty", "ugliness", "art", "science", "philosophy", "religion", "politics", "economics", "society", "individual", "collective", "family", "friendship", "enemy", "normal", "abnormal", "nature", "culture", "technology", "medicine", "education", "work", "leisure", "sport", "game", "music", "literature", "cinema", "theater", "dance", "painting", "sculpture", "architecture", "photography", "poetry", "prose", "novel", "essay", "thesis", "antithesis", "synthesis", "theory", "practice", "abstract", "concrete", "virtual", "real", "imaginary", "real", "possible", "impossible", "probable", "improbable", "necessary", "contingent", "absolute", "relative", "universal", "particular", "general", "singular", "multiple", "unique", "common", "public", "private", "intimate", "personal", "collective", "individual", "social", "societal", "political", "economic", "cultural", "religious", "scientific", "artistic", "technological", "medical", "educational", "playful", "sporty"]);
+
+	const frenchAnswer = [
+		"Mais quelle question stupide !", " Tout cela n'est que concepts abstraits inventés par cette animal que vous appelez l'homme. Prenez plutôt un gin & tonic !",
 	];
-	const englishAnswers = [
-		"Such a stupid question! All of this is just abstract concepts invented by this animal you call a human. Take a gin & tonic instead!",]
+	const englishAnswer = [
+		"Such a stupid question!"," All of this is just abstract concepts invented by this animal you call a human. Take a gin & tonic instead!",]
 	const supportedVoices = window.speechSynthesis.getVoices().map((voice) => {
 		return voice.lang
 	})
@@ -142,24 +145,45 @@ import background from '../assets/background.svg';
 			e.preventDefault();
 			const searchTextValue = input?.value;
 			if(!searchTextValue) return;
+			const cleanedText = searchTextValue.replaceAll(",", " ").replaceAll(".", " ").replaceAll("?", " ").replaceAll("!", " ").replaceAll(";", " ").replaceAll(":", " ").replaceAll("(", " ").replaceAll(")", " ").replaceAll("[", " ").replaceAll("]", " ").replaceAll("{", " ").replaceAll("}", " ").replaceAll("«", " ").replaceAll("»", " ").replaceAll("“", " ").replaceAll("”", " ").replaceAll("‘", " ").replaceAll("’", " ").replaceAll("—", " ").replaceAll("–", " ").replaceAll("…", " ").replaceAll("‹", " ").replaceAll("›", " ").replaceAll("„", " ").replaceAll("“", " ").replaceAll("”", " ").replaceAll("‘", " ").replaceAll("’", " ").replaceAll("‚", " ").replaceAll("’", " ").replaceAll("‛", " ").toLowerCase();
+			const cleanedTextArray = cleanedText.split(' ');
 
-			const langUsedInQuestion = franc(searchTextValue);
+			let langUsedInQuestion = franc(searchTextValue);
+			console.log(langUsedInQuestion);
 
 			if(langUsedInQuestion === 'fra') {
 				if(!supportedVoices.includes('fr-FR')) {
-					answers = ["I cannot speak French, I'm sorry. But take a gin & tonix & chillax. Cheerio."];
+					answers = ["I cannot speak French, I'm sorry. But take a gin & tonic & chillax. Cheerio."];
 				} else {
-					answers = frenchAnswers;
+					const wordsSearched = new Set(cleanedTextArray);
+					const wordsInConcepts = wordsSearched.intersection(frenchConceptsWords);
+					if(wordsInConcepts.size === 0) {
+						console.log('no concepts found');
+						answers = [frenchAnswer.join(' ')];
+					} else {
+						const denyConcepts = `${[...wordsInConcepts].join(', ')}, ${frenchAnswer[1]}`;
+						answers = [denyConcepts];
+					}
 				}
 			} else if(langUsedInQuestion === 'eng') {
 				if (!supportedVoices.includes('en-US' || 'en-GB')) {
 					answers = ["Désolé, je ne parle pas anglais. Mais je vous suggère de prendre un bon ptit gin & tonic."];
 				} else {
-					answers = englishAnswers;
+					const wordsSearched = new Set(cleanedTextArray);
+					const wordsInConcepts = wordsSearched.intersection(englishConceptsWords);
+					if(wordsInConcepts.size === 0) {
+						console.log('no concepts found');
+						answers = [englishAnswer.join(' ')];
+					} else {
+						console.log(wordsInConcepts);
+						const denyConcepts = `${[...wordsInConcepts].join(', ')}, ${englishAnswer[1]}`;
+						answers = [denyConcepts];
+					}
 				}
 			}
-
+			console.log(answers);
 			const randomAnswer = answers[Math.floor(Math.random() * answers.length)];
+			console.log(randomAnswer);
 
 			const utterThis = new SpeechSynthesisUtterance(randomAnswer);
 			speechSynthesis.speak(utterThis);
