@@ -95,11 +95,12 @@ import background from '../assets/background.svg';
 					display: flex;
 					align-items: center;
 					gap: 0.5rem;
-					padding-inline-end: 3rem;
+					width: fit-content;
 					align-self: flex-end;
 
 					svg {
 						min-width: 1rem;
+						max-width: 1rem;
 						min-height: 1rem;
 						opacity: 0.8;
 					}
@@ -139,6 +140,16 @@ import background from '../assets/background.svg';
 	document.addEventListener('DOMContentLoaded', () => {
 		const form = document.querySelector('form');
 		const input = document.getElementById('nihilist-search');
+
+		const title = document.querySelector('h1');
+		const inputLabel = document.querySelector('label');
+		const buttonText = document.querySelector('button span');
+
+		if(!supportedVoices.includes("fr-FR")) {
+			title.textContent = "Nihilism & Objectif 52 Labs";
+			inputLabel.textContent = "Type your question to infinite wisdom:";
+			buttonText.textContent = "Ask";
+		}
 
 
 		form.addEventListener('submit', (e) => {
